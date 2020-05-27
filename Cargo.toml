@@ -1,6 +1,6 @@
 [package]
 name = "groepmaak"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Donatas Rasiukevicius <d.rasiukevicius@labdigital.nl>"]
 edition = "2018"
 
