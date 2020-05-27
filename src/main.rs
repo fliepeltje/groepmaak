@@ -77,8 +77,10 @@ fn format_groups(groups: Vec<Vec<String>>) -> String {
 }
 
 fn format_single_group(group: Vec<String>, group_number: usize) -> String {
-    let mut body = vec![format!("Group {}:", group_number + 1)];
-    body.extend(group);
+    let header = vec![format!("Group {}:", group_number + 1)];
+    let (lead, tail) = group.split_at(1);
+    let lead = vec![format!("{} - dagvoorzitter", lead.get(0).unwrap())];
+    let body = [header, lead, tail.to_owned()].concat();
     let group_string = body.join("\n");
     group_string
 }
