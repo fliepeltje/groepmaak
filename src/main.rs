@@ -31,12 +31,39 @@ fn create_name_vector(path: &PathBuf) -> Vec<String> {
     names
 }
 
-fn create_groups(names: Vec<String>, group_size: &u8) -> Vec<Vec<String>> {
+fn create_groups(names: Vec<String>, group_size: &usize) -> Vec<Vec<String>> {
     let groups: Vec<Vec<String>> = names
         .chunks(group_size.to_owned().into())
         .map(|v| v.to_vec())
         .collect();
-    groups
+    match groups.len() {
+        0 | 1 => groups,
+        _ => {
+            let final_len = groups.last().expect("No final group found").len();
+            if &final_len == group_size {
+                groups
+            } else {
+                let (l_groups, last_group) = groups.split_at(groups.len() - 1);
+                concat_groups(
+                    l_groups.to_owned(),
+                    last_group.get(0).unwrap().to_owned()
+                )
+            }
+        }
+    }
+}
+
+fn concat_groups(groups: Vec<Vec<String>>, to_join: Vec<String>) -> Vec<Vec<String>> {
+    match to_join.len() {
+        0 => groups,
+        _ => {
+            let (extension, tail_joins) = to_join.split_at(1);
+            let (group, tail_groups) = groups.split_at(1);
+            let group = group.get(0).unwrap().to_owned();
+            let new_group = [group, extension.to_owned()].concat();
+            [vec![new_group], concat_groups(tail_groups.to_owned(), tail_joins.to_owned())].concat()
+        }
+    }
 }
 
 fn format_groups(groups: Vec<Vec<String>>) -> String {
@@ -59,7 +86,7 @@ fn format_single_group(group: Vec<String>, group_number: usize) -> String {
 fn main() {
     let opt = Opt::from_args();
     let ordered_list = create_name_vector(&opt.names_file);
-    let shuffled_list = create_groups(ordered_list, &opt.group_size);
+    let shuffled_list = create_groups(ordered_list, &opt.group_size.into());
     let group_output = format_groups(shuffled_list);
     match opt.output {
         Some(path) => {
